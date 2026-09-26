@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>EduGenie - AI Learning Assistant</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+
+        <div class="logo">
+            🎓 EduGenie
+        </div>
+
+        <div class="tagline">
+            AI Powered Learning Assistant
+        </div>
+
+    </header>
+
+
+    <!-- Main Container -->
+    <main class="container">
+
+        <section class="hero">
+
+            <h1>Welcome to EduGenie</h1>
+
+            <p>
+                Learn smarter with AI-powered explanations,
+                questions, quizzes, summaries and learning paths.
+            </p>
+
+        </section>
+
+
+        <!-- Input Card -->
+        <section class="card">
+
+            <h2>What would you like to learn?</h2>
+
+
+            <!-- Task Selection -->
+            <label for="task">
+                Choose a task
+            </label>
+
+            <select id="task">
+
+                <option value="qa">
+                    Ask Question
+                </option>
+
+                <option value="explain">
+                    Explain Topic
+                </option>
+
+                <option value="quiz">
+                    Generate Quiz
+                </option>
+
+                <option value="summarize">
+                    Summarize
+                </option>
+
+                <option value="learn">
+                    Learning Path
+                </option>
+
+            </select>
+
+
+            <!-- Text Input -->
+            <label for="content">
+                Enter your question or topic
+            </label>
+
+            <textarea
+                id="content"
+                rows="8"
+                placeholder="Example: What is Python?"
+            ></textarea>
+
+
+            <!-- Generate Button -->
+            <button
+                id="generateBtn"
+                onclick="generateAnswer()"
+            >
+                ✨ Generate
+            </button>
+
+        </section>
+
+
+        <!-- Loading -->
+        <section
+            id="loading"
+            class="loading"
+            style="display: none;"
+        >
+
+            <div class="loader"></div>
+
+            <p>
+                EduGenie is thinking...
+            </p>
+
+        </section>
+
+
+        <!-- Result -->
+        <section
+            id="resultCard"
+            class="card result-card"
+            style="display: none;"
+        >
+
+            <h2>📚 Result</h2>
+
+            <div id="result"></div>
+
+        </section>
+
+
+        <!-- Error -->
+        <section
+            id="errorCard"
+            class="card error-card"
+            style="display: none;"
+        >
+
+            <h2>⚠️ Error</h2>
+
+            <div id="errorMessage"></div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer>
+
+        <p>
+            © 2026 EduGenie | Google Gemini Powered Learning Assistant
+        </p>
+
+    </footer>
+
+
+    <!-- JavaScript -->
+    <script>
+
+        async function generateAnswer() {
+
+            const task =
+                document.getElementById("task").value;
+
+            const content =
+                document.getElementById("content").value.trim();
+
+            const resultCard =
+                document.getElementById("resultCard");
+
+            const result =
+                document.getElementById("result");
+
+            const errorCard =
+                document.getElementById("errorCard");
+
+            const errorMessage =
+                document.getElementById("errorMessage");
+
+            const loading =
+                document.getElementById("loading");
+
+            const button =
+                document.getElementById("generateBtn");
+
+
+            // Clear previous result
+            result.innerHTML = "";
+
+            errorMessage.innerHTML = "";
+
+            resultCard.style.display = "none";
+
+            errorCard.style.display = "none";
+
+
+            // Validate input
+            if (!content) {
+
+                errorMessage.innerHTML =
+                    "Please enter a question or topic.";
+
+                errorCard.style.display = "block";
+
+                return;
+            }
+
+
+            // Show loading
+            loading.style.display = "block";
+
+            button.disabled = true;
+
+            button.innerText = "Generating...";
+
+
+            // Select API endpoint
+            let endpoint = "";
+
+
+            if (task === "qa") {
+
+                endpoint = "/qa";
+
+            }
+
+            else if (task === "explain") {
+
+                endpoint = "/explain";
+
+            }
+
+            else if (task === "quiz") {
+
+                endpoint = "/quiz";
+
+            }
+
+            else if (task === "summarize") {
+
+                endpoint = "/summarize";
+
+            }
+
+            else if (task === "learn") {
+
+                endpoint = "/learn/recommendations";
+
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    endpoint,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            text: content
+                        })
+                    }
+                );
+
+
+                const data =
+                    await response.json();
+
+
+                // Check API error
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Something went wrong."
+                    );
+                }
+
+
+                // Display result
+                displayResult(
+                    task,
+                    data
+                );
+
+            }
+
+
+            catch (error) {
+
+                errorMessage.innerText =
+                    error.message;
+
+                errorCard.style.display =
+                    "block";
+            }
+
+
+            finally {
+
+                loading.style.display =
+                    "none";
+
+                button.disabled = false;
+
+                button.innerText =
+                    "✨ Generate";
+            }
+
+        }
+
+
+
+        function displayResult(task, data) {
+
+            const result =
+                document.getElementById("result");
+
+            const resultCard =
+                document.getElementById("resultCard");
+
+
+            result.innerHTML = "";
+
+
+            // -------------------------
+            // Q&A
+            // -------------------------
+
+            if (task === "qa") {
+
+                result.innerHTML =
+                    formatText(data.answer);
+
+            }
+
+
+            // -------------------------
+            // Explain
+            // -------------------------
+
+            else if (task === "explain") {
+
+                result.innerHTML =
+                    formatText(data.answer);
+
+            }
+
+
+            // -------------------------
+            // Summary
+            // -------------------------
+
+            else if (task === "summarize") {
+
+                result.innerHTML =
+                    formatText(data.summary);
+
+            }
+
+
+            // -------------------------
+            // Learning Path
+            // -------------------------
+
+            else if (task === "learn") {
+
+                result.innerHTML =
+                    formatText(data.recommendations);
+
+            }
+
+
+            // -------------------------
+            // Quiz
+            // -------------------------
+
+            else if (task === "quiz") {
+
+                displayQuiz(data.quiz);
+
+            }
+
+
+            resultCard.style.display =
+                "block";
+
+        }
+
+
+
+        function displayQuiz(quiz) {
+
+            const result =
+                document.getElementById("result");
+
+
+            // If quiz is an object
+            if (
+                typeof quiz === "object" &&
+                quiz !== null
+            ) {
+
+                result.innerHTML =
+                    formatObject(quiz);
+
+                return;
+            }
+
+
+            // If quiz is plain text
+            result.innerHTML =
+                formatText(quiz);
+
+        }
+
+
+
+        function formatObject(obj) {
+
+            let html = "";
+
+
+            // Array
+            if (Array.isArray(obj)) {
+
+                obj.forEach(
+                    (item, index) => {
+
+                        html += `
+                            <div class="quiz-question">
+
+                                <h3>
+                                    Question ${index + 1}
+                                </h3>
+
+                                ${formatObject(item)}
+
+                            </div>
+                        `;
+
+                    }
+                );
+
+                return html;
+            }
+
+
+            // Object
+            if (
+                typeof obj === "object" &&
+                obj !== null
+            ) {
+
+                Object.entries(obj).forEach(
+                    ([key, value]) => {
+
+                        const title =
+                            key
+                                .replaceAll("_", " ")
+                                .replace(
+                                    /\b\w/g,
+                                    char =>
+                                        char.toUpperCase()
+                                );
+
+
+                        if (
+                            typeof value === "object" &&
+                            value !== null
+                        ) {
+
+                            html += `
+                                <div class="object-section">
+
+                                    <h3>
+                                        ${title}
+                                    </h3>
+
+                                    ${formatObject(value)}
+
+                                </div>
+                            `;
+
+                        }
+
+                        else {
+
+                            html += `
+                                <p>
+                                    <strong>
+                                        ${title}:
+                                    </strong>
+                                    ${escapeHtml(value)}
+                                </p>
+                            `;
+
+                        }
+
+                    }
+                );
+
+                return html;
+            }
+
+
+            return escapeHtml(obj);
+
+        }
+
+
+
+        function formatText(text) {
+
+            if (text === null ||
+                text === undefined) {
+
+                return "";
+            }
+
+
+            text = String(text);
+
+
+            return escapeHtml(text)
+                .replace(/\n/g, "<br>");
+        }
+
+
+
+        function escapeHtml(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                String(value);
+
+            return div.innerHTML;
+        }
+
+
+
+        // Enter key support
+        document
+            .getElementById("content")
+            .addEventListener(
+                "keydown",
+                function(event) {
+
+                    if (
+                        event.ctrlKey &&
+                        event.key === "Enter"
+                    ) {
+
+                        generateAnswer();
+
+                    }
+
+                }
+            );
+
+    </script>
+
+</body>
+
+</html>
